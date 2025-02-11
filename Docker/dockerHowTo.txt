@@ -1,0 +1,11 @@
+
+
+docker build .
+
+docker volume inspect 
+
+docker rmi
+
+
+
+docker container prune
