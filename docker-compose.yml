@@ -1,0 +1,71 @@
+version: '3.8' # Указывает версию синтаксиса docker-compose.
+
+services: 
+  web:
+    image: nginx:alpine 
+    ports:
+      - "80:80"
+    volumes:
+      - ./static:/usr/share/nginx/html
+    restart: unless-stopped
+
+
+
+# services: Список сервисов (контейнеров).
+# web: Имя сервиса.
+# image: Используется образ nginx:alpine.
+# ports: Пробрасывает порт 80 контейнера на порт 80 хоста.
+# volumes: Монтирует локальную папку ./static в контейнер (для статических файлов).
+# restart: Перезапуск контейнера при падении (кроме ручной остановки).
+
+
+##############################
+# Django + PostgreSQL + Redis
+##############################
+
+version: '3.8'
+
+services:
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - POSTGRES_NAME=dbname
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+    depends_on:
+      - postgres
+      - redis
+
+  postgres:
+    image: postgres:13
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: dbname
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+
+  redis:
+    image: redis:alpine
+
+volumes:
+  postgres_data:
+  
+
+# Что происходит:
+
+# Сервис web:
+  # Собирается из Dockerfile в текущей директории.
+  # Запускает Django-сервер.
+  # Монтирует текущую директорию в /app 
+  # Переменные окружения для подключения к PostgreSQL.
+  # Зависит от postgres и redis.
+# Сервис postgres:
+  # Использует PostgreSQL 13.
+  # Сохраняет данные в томе postgres_data.
+# Сервис redis: Использует Redis (легкий образ alpine).
